@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
 
 // This route can be called by Vercel Crons to clean up expired reservations
 // Vercel crons doc: https://vercel.com/docs/crons
 export async function POST(request: NextRequest) {
+  // Lazily import Prisma to avoid potential build-time errors
+  const { default: prisma } = await import('@/lib/prisma')
   // Verify cron secret if provided
   if (process.env.CRON_SECRET) {
     const authHeader = request.headers.get('authorization')
