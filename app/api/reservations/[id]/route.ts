@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
 import { getReservation } from '@/lib/mockData'
 
 export async function GET(
@@ -7,6 +6,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { default: prisma } = await import('@/lib/prisma')
     const { id: reservationId } = await params
     console.log('Fetching reservation:', reservationId)
 

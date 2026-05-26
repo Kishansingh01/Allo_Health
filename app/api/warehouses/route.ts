@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
 import { mockWarehouses } from '@/lib/mockData'
 
 export async function GET(_request: NextRequest) {
   try {
+    const { default: prisma } = await import('@/lib/prisma')
+
     const warehouses = await prisma.warehouse.findMany({
       orderBy: {
         name: 'asc',

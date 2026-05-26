@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
 import { acquireLock, releaseLock, setWithExpiry, getFromRedis } from '@/lib/redis'
 import { createReservationSchema } from '@/lib/schemas'
 import { createMockReservation } from '@/lib/mockData'
@@ -9,6 +8,7 @@ const RESERVATION_TTL = 600
 
 export async function POST(request: NextRequest) {
   try {
+    const { default: prisma } = await import('@/lib/prisma')
     const body = await request.json()
     const idempotencyKey = request.headers.get('Idempotency-Key')
 
