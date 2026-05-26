@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
 import { mockProducts } from '@/lib/mockData'
 
 export async function GET(_request: NextRequest) {
   try {
-    // Prefer database when available
+    // Lazy import Prisma to avoid touching DB during build-time
+    const { default: prisma } = await import('@/lib/prisma')
+
     const products = await prisma.product.findMany({
       include: {
         stocks: {
