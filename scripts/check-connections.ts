@@ -48,7 +48,7 @@ async function checkRedis() {
 
   const client = createClient({ url })
   client.on('error', (err) => {
-    // Node redis prints errors; we'll handle after trying to connect
+    console.error('Redis client error', err)
   })
 
   try {
