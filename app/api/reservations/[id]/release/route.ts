@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
+// Prisma is imported lazily inside the handler to avoid build-time DB access
 import { acquireLock, releaseLock } from '@/lib/redis'
 import { releaseReservation as releaseMockReservation } from '@/lib/mockData'
 
@@ -8,6 +8,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { default: prisma } = await import('@/lib/prisma')
     const { id: reservationId } = await params
 
     try {
