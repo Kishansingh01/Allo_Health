@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     // Release each expired reservation in a transaction
     const releaseResults = await Promise.all(
       expiredReservations.map((reservation) =>
-        prisma.$transaction(async (tx) => {
+        prisma.$transaction(async (tx: any) => {
           // Release the reserved units
           await tx.stock.update({
             where: {

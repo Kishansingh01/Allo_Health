@@ -8,7 +8,12 @@ const RESERVATION_TTL = 600
 
 export async function POST(request: NextRequest) {
   try {
-    const { default: prisma } = await import('@/lib/prisma')
+    let prisma: any = null
+    const hasDatabase = Boolean(process.env.DATABASE_URL)
+    if (hasDatabase) {
+      const mod = await import('@/lib/prisma')
+      prisma = mod.default
+    }
     const body = await request.json()
     const idempotencyKey = request.headers.get('Idempotency-Key')
 
@@ -37,11 +42,13 @@ export async function POST(request: NextRequest) {
 
     // 3. Fast check if PostgreSQL database is running and reachable
     let isDbAvailable = false
-    try {
-      await prisma.$queryRaw`SELECT 1`
-      isDbAvailable = true
-    } catch (e) {
-      console.log('Database not available, using mock mode fallback.')
+    if (prisma) {
+      try {
+        await prisma.$queryRaw`SELECT 1`
+        isDbAvailable = true
+      } catch (e) {
+        console.log('Database not available, using mock mode fallback.')
+      }
     }
 
     // 4. Database Path (with Concurrency Control & Redis Lock)
@@ -65,7 +72,7 @@ export async function POST(request: NextRequest) {
 
       try {
         // Execute state changes inside a transaction
-        const response = await prisma.$transaction(async (tx) => {
+        const response = await prisma.$transaction(async (tx: any) => {
           // Re-fetch and verify stock
           const stock = await tx.stock.findUnique({
             where: {

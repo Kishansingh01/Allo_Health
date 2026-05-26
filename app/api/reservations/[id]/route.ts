@@ -6,8 +6,13 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { default: prisma } = await import('@/lib/prisma')
     const { id: reservationId } = await params
+    let prisma: any = null
+    const hasDatabase = Boolean(process.env.DATABASE_URL)
+    if (hasDatabase) {
+      const mod = await import('@/lib/prisma')
+      prisma = mod.default
+    }
     console.log('Fetching reservation:', reservationId)
 
     // 1. Check if database is available

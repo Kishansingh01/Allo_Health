@@ -8,18 +8,25 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { default: prisma } = await import('@/lib/prisma')
     const { id: reservationId } = await params
+    let prisma: any = null
+    const hasDatabase = Boolean(process.env.DATABASE_URL)
+    if (hasDatabase) {
+      const mod = await import('@/lib/prisma')
+      prisma = mod.default
+    }
 
-    try {
-      // Get reservation first
-      const reservation = await prisma.reservation.findUnique({
+      try {
+        // Get reservation first (DB path only if prisma available)
+        const reservation = prisma
+          ? await prisma.reservation.findUnique({
         where: { id: reservationId },
         include: {
           product: { select: { name: true } },
           warehouse: { select: { name: true } },
         },
-      })
+            })
+          : null
 
       if (!reservation) {
         return NextResponse.json(
@@ -55,7 +62,7 @@ export async function POST(
 
       try {
         // Release the reservation with transaction
-        const releasedReservation = await prisma.$transaction(async (tx) => {
+        const releasedReservation = await prisma.$transaction(async (tx: any) => {
           // Re-check reservation state after acquiring lock
           const latestReservation = await tx.reservation.findUnique({
             where: { id: reservationId },
@@ -115,7 +122,7 @@ export async function POST(
           }
         }
       }
-    } catch (dbError) {
+      } catch (dbError) {
       // Database not available, use mock data
       try {
         const releasedReservation = releaseMockReservation(reservationId)

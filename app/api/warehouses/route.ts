@@ -3,13 +3,19 @@ import { mockWarehouses } from '@/lib/mockData'
 
 export async function GET(_request: NextRequest) {
   try {
-    const { default: prisma } = await import('@/lib/prisma')
+    let prisma: any = null
+    if (process.env.DATABASE_URL) {
+      const mod = await import('@/lib/prisma')
+      prisma = mod.default
+    }
 
-    const warehouses = await prisma.warehouse.findMany({
+    const warehouses = prisma
+      ? await prisma.warehouse.findMany({
       orderBy: {
         name: 'asc',
       },
-    })
+      })
+      : []
 
     return NextResponse.json(warehouses)
   } catch (error) {

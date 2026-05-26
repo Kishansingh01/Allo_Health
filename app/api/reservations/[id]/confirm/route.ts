@@ -10,8 +10,13 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { default: prisma } = await import('@/lib/prisma')
     const { id: reservationId } = await params
+    let prisma: any = null
+    const hasDatabase = Boolean(process.env.DATABASE_URL)
+    if (hasDatabase) {
+      const mod = await import('@/lib/prisma')
+      prisma = mod.default
+    }
     const idempotencyKey = request.headers.get('Idempotency-Key')
 
     // Check for idempotent request
@@ -79,7 +84,7 @@ export async function POST(
 
       try {
         // Confirm the reservation with transaction
-        const confirmedReservation = await prisma.$transaction(async (tx) => {
+        const confirmedReservation = await prisma.$transaction(async (tx: any) => {
           // Re-check reservation state after acquiring lock
           const latestReservation = await tx.reservation.findUnique({
             where: { id: reservationId },
