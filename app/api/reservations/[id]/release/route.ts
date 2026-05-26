@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 // Prisma is imported lazily inside the handler to avoid build-time DB access
-import { acquireLock, releaseLock } from '@/lib/redis'
+import { acquireLock, releaseLock, isManagedRedis } from '@/lib/redis'
 import { releaseReservation as releaseMockReservation } from '@/lib/mockData'
 
 export async function POST(
@@ -46,7 +46,7 @@ export async function POST(
         // Redis not available
       }
 
-      if (!lockId && process.env.REDIS_URL && process.env.REDIS_URL !== 'redis://localhost:6379') {
+      if (!lockId && isManagedRedis(process.env.REDIS_URL)) {
         return NextResponse.json(
           { error: 'Resource temporarily unavailable, please retry' },
           { status: 503 }

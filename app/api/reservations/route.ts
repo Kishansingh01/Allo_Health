@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { acquireLock, releaseLock, setWithExpiry, getFromRedis } from '@/lib/redis'
+import { acquireLock, releaseLock, setWithExpiry, getFromRedis, isManagedRedis } from '@/lib/redis'
 import { createReservationSchema } from '@/lib/schemas'
 import { createMockReservation } from '@/lib/mockData'
 
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
       }
 
       // If Redis URL is set (indicating production environment) but lock failed, return 503
-      if (!lockId && process.env.REDIS_URL && process.env.REDIS_URL !== 'redis://localhost:6379') {
+      if (!lockId && isManagedRedis(process.env.REDIS_URL)) {
         return NextResponse.json(
           { error: 'Resource temporarily unavailable, please retry' },
           { status: 503 }

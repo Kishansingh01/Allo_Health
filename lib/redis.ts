@@ -121,3 +121,9 @@ export async function getFromRedis(key: string): Promise<string | null> {
     return null
   }
 }
+
+export function isManagedRedis(url?: string) {
+  if (!url) return false
+  // Treat localhost and 127.0.0.1 as local development Redis
+  return !/localhost|127\.0\.0\.1/.test(url)
+}
