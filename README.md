@@ -1,6 +1,6 @@
 # Allo Inventory Reservation System
 
-# kishan1 branch i have done something 2:16 AM
+# gautam1 branch i have done something 2:30 AM
 
 A Next.js full-stack application for managing multi-warehouse inventory with real-time reservation system. Handles concurrent reservation requests safely to prevent overselling.
 
